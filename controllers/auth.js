@@ -22,8 +22,12 @@ export const register = async (req, res) => {
       password: hash,
     });
 
+    const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
     await newUser.save();
     return res.json({
+      newUser,
+      token,
       message: 'Successfully registration.',
     });
   } catch (error) {
@@ -69,5 +73,23 @@ export const login = async (req, res) => {
 //Get me
 export const getMe = async (req, res) => {
   try {
-  } catch (error) {}
+    const user = await User.findById(req.userId);
+    if (!user) {
+      return res.json({
+        message: 'No such user.',
+      });
+    }
+
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+    res.json({
+      user,
+      token,
+    });
+  } catch (error) {
+    console.log('### Error', error);
+    return res.json({
+      message: 'No access',
+    });
+  }
 };
