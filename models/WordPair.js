@@ -4,11 +4,14 @@ const WordPairSchema = new mongoose.Schema({
   eng: {
     type: String,
     required: true,
-    unique: true,
   },
   rus: {
     type: String,
     required: true,
+  },
+  listId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'List',
   },
 });
 

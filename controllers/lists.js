@@ -4,19 +4,43 @@ import User from '../models/User.js';
 export const createList = async (req, res) => {
   try {
     const { name } = req.body;
-    // const user = await User.findById(req.userId);
+
+    const list = await List.exists({ name });
+    if (list) {
+      return res.json({
+        message: 'Such list name is already exist.',
+      });
+    }
 
     const newList = new List({
       name,
       words: [],
+      owner: req.userId,
     });
-
     newList.save();
     await User.findByIdAndUpdate(req.userId, {
       $push: { lists: newList },
     });
 
     res.json(newList);
+  } catch (error) {
+    console.log('### Error', error);
+    res.json({
+      message: 'Something went wrong.',
+    });
+  }
+};
+export const getUserLists = async (req, res) => {
+  try {
+    const userLists = await List.find({ owner: req.userId });
+
+    if (userLists.length > 0) {
+      res.json(userLists);
+    } else {
+      res.json({
+        message: 'No lists.',
+      });
+    }
   } catch (error) {
     console.log('### Error', error);
     res.json({

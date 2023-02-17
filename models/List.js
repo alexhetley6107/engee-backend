@@ -4,7 +4,6 @@ const ListSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    unique: true,
   },
   words: [
     {
@@ -12,6 +11,10 @@ const ListSchema = new mongoose.Schema({
       ref: 'WordPair',
     },
   ],
+  owner: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  },
 });
 
 export default mongoose.model('List', ListSchema);
