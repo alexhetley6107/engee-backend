@@ -18,6 +18,7 @@ export const createList = async (req, res) => {
       owner: req.userId,
     });
     newList.save();
+
     await User.findByIdAndUpdate(req.userId, {
       $push: { lists: newList },
     });

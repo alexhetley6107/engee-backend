@@ -8,7 +8,7 @@ const ListSchema = new mongoose.Schema({
   words: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'WordPair',
+      ref: 'Word',
     },
   ],
   owner: {

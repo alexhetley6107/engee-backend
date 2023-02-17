@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const WordPairSchema = new mongoose.Schema({
+const WordSchema = new mongoose.Schema({
   eng: {
     type: String,
     required: true,
@@ -9,10 +9,10 @@ const WordPairSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  listId: {
+  placeListId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'List',
   },
 });
 
-export default mongoose.model('WordPair', WordPairSchema);
+export default mongoose.model('Word', WordSchema);
