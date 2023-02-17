@@ -14,7 +14,7 @@ const UserSchema = new mongoose.Schema(
     lists: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'PairsList',
+        ref: 'List',
       },
     ],
   }
