@@ -1,6 +1,7 @@
 import User from '../models/User.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { addDefaultLists } from '../utils/addDefaultLists.js';
 
 export const register = async (req, res) => {
   try {
@@ -22,9 +23,10 @@ export const register = async (req, res) => {
       password: hash,
     });
 
-    const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
-
     await newUser.save();
+    addDefaultLists(newUser._id);
+
+    const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
     return res.json({
       newUser,
       token,

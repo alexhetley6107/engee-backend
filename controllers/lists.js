@@ -1,5 +1,7 @@
 import List from '../models/List.js';
 import User from '../models/User.js';
+import Word from '../models/Word.js';
+import { addDefaultLists } from '../utils/addDefaultLists.js';
 
 export const createList = async (req, res) => {
   try {
@@ -49,7 +51,6 @@ export const getUserLists = async (req, res) => {
     });
   }
 };
-
 export const renameList = async (req, res) => {
   try {
     const { id, name } = req.body;
@@ -71,6 +72,7 @@ export const renameList = async (req, res) => {
 export const deleteList = async (req, res) => {
   try {
     const { id } = req.body;
+    await Word.deleteMany({ placeListId: id });
     await List.findByIdAndDelete(id);
 
     await User.findByIdAndUpdate(req.userId, {
@@ -79,6 +81,21 @@ export const deleteList = async (req, res) => {
     res.json({
       message: 'List was deleted',
     });
+  } catch (error) {
+    console.log('### Error', error);
+    res.json({
+      message: 'Something went wrong.',
+    });
+  }
+};
+
+export const getDefaultLists = async (req, res) => {
+  try {
+    addDefaultLists(req.userId);
+
+    const userLists = await List.find({ owner: req.userId });
+
+    res.json(userLists);
   } catch (error) {
     console.log('### Error', error);
     res.json({
