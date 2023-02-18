@@ -3,9 +3,9 @@ import Word from '../models/Word.js';
 
 export const createWord = async (req, res) => {
   try {
-    const { eng, rus, id } = req.body;
+    const { eng, rus, placeListId } = req.body;
 
-    const word = await Word.exists({ eng, placeListId: id });
+    const word = await Word.exists({ eng, placeListId });
     if (word) {
       return res.json({
         message: 'Such word is already added to the list.',
@@ -15,11 +15,12 @@ export const createWord = async (req, res) => {
     const newWordPair = new Word({
       eng,
       rus,
-      placeListId: id,
+      placeListId,
     });
+    console.log(newWordPair);
     newWordPair.save();
 
-    await List.findByIdAndUpdate(id, {
+    await List.findByIdAndUpdate(placeListId, {
       $push: { words: newWordPair },
     });
 
@@ -34,7 +35,7 @@ export const createWord = async (req, res) => {
 
 export const updateWord = async (req, res) => {
   try {
-    const { eng, rus, _id, placeListId } = req.body;
+    const { eng, rus, id, placeListId } = req.body;
 
     const word = await Word.exists({ eng, placeListId });
     if (word) {
@@ -43,7 +44,7 @@ export const updateWord = async (req, res) => {
       });
     }
 
-    await Word.findByIdAndUpdate(_id, {
+    await Word.findByIdAndUpdate(id, {
       $set: { eng, rus },
     });
     res.json({
@@ -59,12 +60,12 @@ export const updateWord = async (req, res) => {
 
 export const deleteWord = async (req, res) => {
   try {
-    const { _id, placeListId } = req.body;
+    const { id, placeListId } = req.body;
 
-    await Word.findByIdAndDelete(_id);
+    await Word.findByIdAndDelete(id);
 
     await List.findByIdAndUpdate(placeListId, {
-      $pull: { lists: id },
+      $pull: { words: id },
     });
 
     res.json({
@@ -80,9 +81,9 @@ export const deleteWord = async (req, res) => {
 
 export const getListWords = async (req, res) => {
   try {
-    const { _id } = req.body;
+    const { id } = req.body;
 
-    const listWords = await Word.find({ placeListId: _id });
+    const listWords = await Word.find({ placeListId: id });
 
     if (listWords.length > 0) {
       res.json(listWords);
@@ -108,7 +109,7 @@ export const getWordsByListIds = async (req, res) => {
         return Word.find({ placeListId: id });
       })
     );
-    res.json(sessionWords);
+    res.json(sessionWords.flat());
   } catch (error) {
     console.log('### Error', error);
     res.json({
