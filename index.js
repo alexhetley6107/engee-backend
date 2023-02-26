@@ -18,6 +18,7 @@ const DB_NAME = process.env.DB_NAME;
 //Middleware
 app.use(cors());
 app.use(express.json());
+mongoose.set('strictQuery', false);
 
 //Routes
 app.use('/api/auth', authRoute);
