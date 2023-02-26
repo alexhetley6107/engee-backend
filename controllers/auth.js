@@ -18,19 +18,20 @@ export const register = async (req, res) => {
     const salt = bcrypt.genSaltSync(10);
     const hash = bcrypt.hashSync(password, salt);
 
-    const newUser = new User({
+    const user = new User({
       username,
       password: hash,
+      lists: [],
     });
 
-    await newUser.save();
-    addDefaultLists(newUser._id);
+    await user.save();
+    addDefaultLists(user._id);
 
-    const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
     return res.json({
-      newUser,
+      user,
       token,
-      message: 'Successfully registration.',
     });
   } catch (error) {
     console.log('### Error', error);
@@ -62,7 +63,6 @@ export const login = async (req, res) => {
     res.json({
       token,
       user,
-      message: 'Successfully login',
     });
   } catch (error) {
     console.log('### Error', error);

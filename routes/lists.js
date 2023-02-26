@@ -16,7 +16,7 @@ router.get('/', checkAuth, getUserLists);
 
 router.get('/default', checkAuth, getDefaultLists);
 
-router.delete('/', checkAuth, deleteList);
+router.delete('/:id', checkAuth, deleteList);
 
 router.put('/', checkAuth, renameList);
 

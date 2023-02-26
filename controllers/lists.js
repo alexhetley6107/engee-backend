@@ -7,13 +7,6 @@ export const createList = async (req, res) => {
   try {
     const { name } = req.body;
 
-    const list = await List.exists({ name });
-    if (list) {
-      return res.json({
-        message: 'Such list name is already exist.',
-      });
-    }
-
     const newList = new List({
       name,
       words: [],
@@ -25,7 +18,7 @@ export const createList = async (req, res) => {
       $push: { lists: newList },
     });
 
-    res.json(newList);
+    res.json({ newList, message: 'New list was added' });
   } catch (error) {
     console.log('### Error', error);
     res.json({
@@ -35,10 +28,10 @@ export const createList = async (req, res) => {
 };
 export const getUserLists = async (req, res) => {
   try {
-    const userLists = await List.find({ owner: req.userId });
+    const lists = await List.find({ owner: req.userId });
 
-    if (userLists.length > 0) {
-      res.json(userLists);
+    if (lists.length > 0) {
+      res.json({ lists });
     } else {
       res.json({
         message: 'No lists.',
@@ -58,7 +51,9 @@ export const renameList = async (req, res) => {
     await List.findByIdAndUpdate(id, {
       $set: { name },
     });
+    const list = await List.findById(id);
     res.json({
+      list,
       message: 'List was renamed',
     });
   } catch (error) {
@@ -68,10 +63,9 @@ export const renameList = async (req, res) => {
     });
   }
 };
-
 export const deleteList = async (req, res) => {
   try {
-    const { id } = req.body;
+    const id = req.params.id;
     await Word.deleteMany({ placeListId: id });
     await List.findByIdAndDelete(id);
 
@@ -79,6 +73,7 @@ export const deleteList = async (req, res) => {
       $pull: { lists: id },
     });
     res.json({
+      id,
       message: 'List was deleted',
     });
   } catch (error) {
@@ -88,14 +83,13 @@ export const deleteList = async (req, res) => {
     });
   }
 };
-
 export const getDefaultLists = async (req, res) => {
   try {
-    addDefaultLists(req.userId);
+    await addDefaultLists(req.userId);
 
-    const userLists = await List.find({ owner: req.userId });
+    const lists = await List.find({ owner: req.userId });
 
-    res.json(userLists);
+    res.json({ lists });
   } catch (error) {
     console.log('### Error', error);
     res.json({

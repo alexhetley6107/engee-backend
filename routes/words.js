@@ -1,7 +1,6 @@
 import { Router } from 'express';
-import { checkAuth } from '../utils/checkAuth.js';
 import {
-  createWord,
+  addNewWord,
   getListWords,
   getWordsByListIds,
   deleteWord,
@@ -10,14 +9,14 @@ import {
 
 const router = new Router();
 
-router.get('/', checkAuth, getListWords);
+router.get('/:id', getListWords);
 
-router.get('/session', checkAuth, getWordsByListIds);
+router.get('/session/:listIds', getWordsByListIds);
 
-router.post('/', checkAuth, createWord);
+router.post('/', addNewWord);
 
-router.put('/', checkAuth, updateWord);
+router.put('/', updateWord);
 
-router.delete('/', checkAuth, deleteWord);
+router.delete('/:id/:listId', deleteWord);
 
 export default router;

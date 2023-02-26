@@ -1,30 +1,23 @@
 import List from '../models/List.js';
 import Word from '../models/Word.js';
 
-export const createWord = async (req, res) => {
+export const addNewWord = async (req, res) => {
   try {
-    const { eng, rus, placeListId } = req.body;
+    const { eng, rus, listId } = req.body;
 
-    const word = await Word.exists({ eng, placeListId });
-    if (word) {
-      return res.json({
-        message: 'Such word is already added to the list.',
-      });
-    }
-
-    const newWordPair = new Word({
+    const word = new Word({
       eng,
       rus,
-      placeListId,
-    });
-    console.log(newWordPair);
-    newWordPair.save();
-
-    await List.findByIdAndUpdate(placeListId, {
-      $push: { words: newWordPair },
+      placeListId: listId,
     });
 
-    res.json(newWordPair);
+    await word.save();
+
+    await List.findByIdAndUpdate(listId, {
+      $push: { words: word._id },
+    });
+
+    res.json({ word, message: 'New word was added.' });
   } catch (error) {
     console.log('### Error', error);
     res.json({
@@ -35,21 +28,13 @@ export const createWord = async (req, res) => {
 
 export const updateWord = async (req, res) => {
   try {
-    const { eng, rus, id, placeListId } = req.body;
-
-    const word = await Word.exists({ eng, placeListId });
-    if (word) {
-      return res.json({
-        message: 'Such word is already added to the list.',
-      });
-    }
+    const { eng, rus, id } = req.body;
 
     await Word.findByIdAndUpdate(id, {
       $set: { eng, rus },
     });
-    res.json({
-      message: 'Successfully updated',
-    });
+    const word = await Word.findById(id);
+    res.json({ word, message: 'Successfully edited.' });
   } catch (error) {
     console.log('### Error', error);
     res.json({
@@ -60,15 +45,18 @@ export const updateWord = async (req, res) => {
 
 export const deleteWord = async (req, res) => {
   try {
-    const { id, placeListId } = req.body;
+    const id = req.params.id;
+    const listId = req.params.listId;
 
     await Word.findByIdAndDelete(id);
 
-    await List.findByIdAndUpdate(placeListId, {
+    await List.findByIdAndUpdate(listId, {
       $pull: { words: id },
     });
 
     res.json({
+      id,
+      listId,
       message: 'Successfully deleted',
     });
   } catch (error) {
@@ -81,15 +69,14 @@ export const deleteWord = async (req, res) => {
 
 export const getListWords = async (req, res) => {
   try {
-    const { id } = req.body;
+    const id = req.params.id;
+    const words = await Word.find({ placeListId: id });
 
-    const listWords = await Word.find({ placeListId: id });
-
-    if (listWords.length > 0) {
-      res.json(listWords);
+    if (words.length > 0) {
+      res.json({ words });
     } else {
       res.json({
-        message: 'No words.',
+        words: [],
       });
     }
   } catch (error) {
@@ -102,14 +89,16 @@ export const getListWords = async (req, res) => {
 
 export const getWordsByListIds = async (req, res) => {
   try {
-    const { listIds } = req.body;
+    const listIdsJSON = req.params.listIds;
+
+    const listIds = JSON.parse(listIdsJSON);
 
     const sessionWords = await Promise.all(
       listIds.map((id) => {
         return Word.find({ placeListId: id });
       })
     );
-    res.json(sessionWords.flat());
+    res.json({ sessionWords: sessionWords.flat() });
   } catch (error) {
     console.log('### Error', error);
     res.json({
